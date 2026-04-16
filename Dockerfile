@@ -35,14 +35,10 @@ RUN git clone https://github.com/freeswitch/sofia-sip /usr/src/libs/sofia-sip
 RUN git clone https://github.com/freeswitch/spandsp /usr/src/libs/spandsp
 RUN git clone https://github.com/signalwire/signalwire-c /usr/src/libs/signalwire-c
 
-WORKDIR /usr/src/libs/libks
-RUN cmake . -DCMAKE_INSTALL_PREFIX=/usr -DWITH_LIBBACKTRACE=1 && make install
-WORKDIR /usr/src/libs/sofia-sip
-RUN ./bootstrap.sh && ./configure --with-pic --with-glib=no --without-doxygen --disable-stun --prefix=/usr && make -j$(nproc) && make install
-WORKDIR /usr/src/libs/spandsp
-RUN ./bootstrap.sh && ./configure --with-pic --prefix=/usr && make -j$(nproc)` && make install
-WORKDIR /usr/src/libs/signalwire-c
-RUN PKG_CONFIG_PATH=/usr/lib/pkgconfig cmake . -DCMAKE_INSTALL_PREFIX=/usr && make install
+RUN cd /usr/src/libs/libks && cmake . -DCMAKE_INSTALL_PREFIX=/usr -DWITH_LIBBACKTRACE=1 && make install
+RUN cd /usr/src/libs/sofia-sip && ./bootstrap.sh && ./configure --with-pic --with-glib=no --without-doxygen --disable-stun --prefix=/usr && make -j`nproc --all` && make install
+RUN cd /usr/src/libs/spandsp && ./bootstrap.sh && ./configure --with-pic --prefix=/usr && make -j`nproc --all` && make install
+RUN cd /usr/src/libs/signalwire-c && PKG_CONFIG_PATH=/usr/lib/pkgconfig cmake . -DCMAKE_INSTALL_PREFIX=/usr && make install
 
 WORKDIR /usr/src/freeswitch
 
@@ -84,4 +80,4 @@ EXPOSE 5066/tcp
 EXPOSE 7443/tcp
 EXPOSE 8081-8082/tcp
 
-CMD ["/usr/bin/freeswitch"]
+CMD ["/usr/bin/freeswitch", "-nonat"]
